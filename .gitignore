@@ -1,1 +1,6 @@
 __pycache__
+sender
+receiver
+CMakeCache.txt
+CMakeFiles
+cmake_install.cmake
