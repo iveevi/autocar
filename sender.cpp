@@ -23,6 +23,11 @@ int send_int(int fd, int value)
 
 int main()
 {
+	string ip;
+
+	cout << "Enter IP address (of PI): ";
+	cin >> ip;
+
 	// Setup ncurses
 	initscr();
 	clear();
@@ -44,17 +49,17 @@ int main()
 	serv_addr.sin_port = htons(PORT);
 
 	// Convert IPv4 and IPv6 addresses from text to binary form
-	if(inet_pton(AF_INET, "127.0.0.1", &serv_addr.sin_addr) <= 0)  {
+	if(inet_pton(AF_INET, ip.c_str(), &serv_addr.sin_addr) <= 0)  {
 		endwin();
 
-		printf("\nInvalid address/ Address not supported \n");
+		printf("Error: Invalid address/ Address not supported \n");
 		return -1;
 	}
 
 	if (connect(sock, (sockaddr *) &serv_addr, sizeof(serv_addr)) < 0) {
 		endwin();
 
-		printf("\nConnection Failed \n");
+		printf("Error: Connection Failed \n");
 		return -1;
 	}
 
