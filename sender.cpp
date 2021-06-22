@@ -41,6 +41,8 @@ int main()
 
 	if ((sock = socket(AF_INET, SOCK_STREAM, 0)) < 0)
 	{
+		endwin();
+
 		printf("\n Socket creation error \n");
 		return -1;
 	}
@@ -62,6 +64,10 @@ int main()
 		printf("Error: Connection Failed \n");
 		return -1;
 	}
+
+	// Display information (box it)
+	printw("Information:\n");
+	printw("IP: %s\n", ip.c_str());
 
 	// Entry message
 	printw("Type input: ");
