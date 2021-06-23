@@ -3,7 +3,10 @@
 #include <arpa/inet.h>
 #include <unistd.h>
 #include <string.h>
-#include <ncurses.h>
+
+// For input
+#include <SFML/Graphics.hpp>
+
 
 #include <iostream>
 #include <fstream>
@@ -11,6 +14,8 @@
 using namespace std;
 
 #define PORT 8080
+
+bool codes[1000];
 
 int send_int(int fd, int value)
 {
@@ -21,28 +26,22 @@ int send_int(int fd, int value)
 	return send(fd, &x, sizeof(int), 0);
 }
 
+using namespace sf;
+
 int main()
 {
 	string ip;
+	int port;
 
 	cout << "Enter IP address (of PI): ";
 	cin >> ip;
 
-	// Setup ncurses
-	initscr();
-	clear();
-	noecho();
-	cbreak();
-
-	keypad(stdscr, TRUE);
+	// cout << "Enter port"
 
 	int sock = 0, valread;
 	sockaddr_in serv_addr;
 
-	if ((sock = socket(AF_INET, SOCK_STREAM, 0)) < 0)
-	{
-		endwin();
-
+	if ((sock = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
 		printf("\n Socket creation error \n");
 		return -1;
 	}
@@ -52,51 +51,51 @@ int main()
 
 	// Convert IPv4 and IPv6 addresses from text to binary form
 	if(inet_pton(AF_INET, ip.c_str(), &serv_addr.sin_addr) <= 0)  {
-		endwin();
-
 		printf("Error: Invalid address/ Address not supported \n");
 		return -1;
 	}
 
 	if (connect(sock, (sockaddr *) &serv_addr, sizeof(serv_addr)) < 0) {
-		endwin();
-
 		printf("Error: Connection Failed \n");
 		return -1;
 	}
 
-	// Display information (box it)
-	printw("Information:\n");
-	printw("IP: %s\n", ip.c_str());
+	// TODO: display statistics
+	cout << "Connected." << endl;
 
-	// Entry message
-	printw("Type input: ");
+	// Main loop
+	while (true) {
+		int sig = 0;
 
-	int c;
-	bool quit = false;
-	do {
-		c = getch();
-		switch (c) {
-		case KEY_UP:
-			send_int(sock, 1);
+		// Checking input (splitting into mutually exclusive pairs of control)
+		if (Keyboard::isKeyPressed(Keyboard::Space))
+			sig |= 0b10000;
+		else if (Keyboard::isKeyPressed(Keyboard::Up))
+			sig |= 0b1;
+		else if (Keyboard::isKeyPressed(Keyboard::Down))
+			sig |= 0b10;
+		
+		if (Keyboard::isKeyPressed(Keyboard::Right))
+			sig |= 0b100;
+		else if (Keyboard::isKeyPressed(Keyboard::Left))
+			sig |= 0b1000;
+		
+		// Check quit
+		if (Keyboard::isKeyPressed(Keyboard::Q))
 			break;
-		case KEY_DOWN:
-			send_int(sock, 2);
-			break;
-		case KEY_LEFT:
-			send_int(sock, 3);
-			break;
-		case KEY_RIGHT:
-			send_int(sock, 4);
-			break;
-		case 'q':
-			quit = true;
-			break;
+
+		// TODO: add brake
+		if (sig) {
+			cout << "sig = " << sig << endl;
+			send_int(sock, sig);
 		}
-	} while (!quit);
+
+		// Some delay
+		usleep(100);
+	}
 
 	send_int(sock, -1);
-	endwin();
 
+	// Ending
 	return 0;
 }
