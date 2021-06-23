@@ -2,7 +2,7 @@ import socket
 import struct
 import serial
 
-# Setup serial
+# Setup serial (ask for port first, with default)
 ser = serial.Serial('/dev/ttyACM0', 9600, timeout=1)
 ser.flush()
 
@@ -16,7 +16,7 @@ print("host = " + socket.gethostname())
 
 print("Passed")
 
-# Transfer loop
+# Transfer loop (do it on a separate loop)
 while True:
         chunk = '' + client.recv(4)
 
